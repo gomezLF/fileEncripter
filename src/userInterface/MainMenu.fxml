@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <VBox alignment="TOP_CENTER" prefHeight="441.0" prefWidth="600.0" spacing="15.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox alignment="TOP_CENTER" spacing="10.0">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" style="-fx-background-color: #1eacf8; -fx-background-radius: 15; -fx-border-color: black; -fx-border-radius: 15;" text="Encriptar" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="20.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                     <padding>
+                        <Insets left="15.0" right="15.0" />
+                     </padding>
+                  </Label>
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label text="Contraseña" />
+                        <PasswordField fx:id="encriptPassword_txt" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="400.0" promptText="Escribe una contraseña" style="-fx-background-radius: 15;">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </PasswordField>
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </VBox>
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label text="Archivo" />
+                        <HBox spacing="15.0">
+                           <children>
+                              <TextField fx:id="pathFileToEncript_txt" editable="false" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="400.0" style="-fx-background-radius: 15;">
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </TextField>
+                              <Button mnemonicParsing="false" onAction="#fileToEncriptClicked" text="Seleccionar archivo" textAlignment="CENTER" />
+                           </children>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets left="10.0" right="10.0" />
+                     </padding>
+                  </VBox>
+                  <Button mnemonicParsing="false" onAction="#encriptFileClicked" text="Encriptar archivo">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Button>
+               </children>
+            </VBox>
+            <Separator maxWidth="-Infinity" minWidth="-Infinity" prefWidth="550.0" />
+            <VBox alignment="TOP_CENTER" prefHeight="302.0" prefWidth="600.0" spacing="10.0">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" style="-fx-background-color: #1eacf8; -fx-background-radius: 15; -fx-border-color: black; -fx-border-radius: 15;" text="Desencriptar" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="20.0" />
+                     </font>
+                     <padding>
+                        <Insets left="15.0" right="15.0" />
+                     </padding>
+                  </Label>
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label text="Contraseña" />
+                        <PasswordField fx:id="decriptPassword_txt" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="400.0" promptText="Escribe la contraseña" style="-fx-background-radius: 15;">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </PasswordField>
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </VBox>
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label text="Archivo" />
+                        <HBox spacing="15.0">
+                           <children>
+                              <TextField fx:id="pathFileToDecript_txt" editable="false" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="400.0" style="-fx-background-radius: 15;">
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </TextField>
+                              <Button mnemonicParsing="false" onAction="#fileToDecriptClicked" text="Seleccionar archivo" textAlignment="CENTER" />
+                           </children>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets left="10.0" right="10.0" />
+                     </padding>
+                  </VBox>
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label text="Hash" />
+                        <HBox spacing="15.0">
+                           <children>
+                              <TextField fx:id="fileHash_txt" editable="false" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="400.0" style="-fx-background-radius: 15;">
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </TextField>
+                              <Button mnemonicParsing="false" onAction="#fileHashClicked" text="Seleccionar archivo" textAlignment="CENTER" />
+                           </children>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets left="10.0" right="10.0" />
+                     </padding>
+                  </VBox>
+                  <Button mnemonicParsing="false" onAction="#decriptFileClicked" text="Desencriptar archivo" />
+               </children>
+            </VBox>
+         </children>
+         <BorderPane.margin>
+            <Insets bottom="10.0" top="10.0" />
+         </BorderPane.margin>
+      </VBox>
+   </top>
+</BorderPane>
