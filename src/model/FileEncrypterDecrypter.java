@@ -42,6 +42,7 @@ public class FileEncrypterDecrypter {
 	public byte[] PBKDF2(char[] password, byte[] salt, int c, int length) {
 		try {
 			SecretKeyFactory kf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+			System.out.println("Hello");
 			PBEKeySpec spec = new PBEKeySpec(password, salt, c, length);
 			SecretKey key = kf.generateSecret(spec);
 			return key.getEncoded();
