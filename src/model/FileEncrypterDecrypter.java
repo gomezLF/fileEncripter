@@ -29,23 +29,21 @@ public class FileEncrypterDecrypter {
 
 	/**
 	 * PBKDF2 implementation based on what the Public-Key Cryptography Standards say
-	 * on the subject. <br>
-	 * It will use HMAC-SHA512 as its pseudo-random function.
-	 * 
-	 * @param password password from which a derived key is generated.
-	 * @param salt     sequence of bits. In this case, it receives a byte array.
-	 * @param c        number of desired iterations.
-	 * @param length   desired bit-length of the generated key.
-	 * @return generated key as a byte array.
-	 * @author Alvaro A. Gomez Rey
+	 * on the subject. 
+	 * @param password This field represents the password that the user typed and 
+	 * this will have a derived key
+	 * @param salt     the salt comprises random bits that are used as one of the 
+	 * inputs in a key derivation function
+	 * @param numberIterations   number of iterations for the PBEK function.
+	 * @param keyLength   the length for the generated key in bytes.
+	 * @return key derived from the function, it is in an array of bits.
 	 */
-	public byte[] PBKDF2(char[] password, byte[] salt, int c, int length) {
+	public byte[] PBKDF2(char[] password, byte[] salt, int numberIterations, int keyLength) {
 		try {
-			SecretKeyFactory kf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-			System.out.println("Hello");
-			PBEKeySpec spec = new PBEKeySpec(password, salt, c, length);
-			SecretKey key = kf.generateSecret(spec);
-			return key.getEncoded();
+			SecretKeyFactory secretKF = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+			PBEKeySpec PBEKeySpec = new PBEKeySpec(password, salt, numberIterations, keyLength);
+			SecretKey secretKey = secretKF.generateSecret(PBEKeySpec);
+			return secretKey.getEncoded();
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			throw new RuntimeException(e);
 		}
@@ -54,202 +52,129 @@ public class FileEncrypterDecrypter {
 
 
 	/**
-	 * Encrypts a file utilizing a given 128-bit key.
-	 * 
-	 * @param key           Key used for the AES algorithm
-	 * @param in            Target file
-	 * @param out           Ciphered file
+	 * This algorithm encrypts the given file using the generated 128-bit
+	 * key from the PBKDF2 algorithm
+	 * @param generatedKey  the key that will be used for the AES algorithm
+	 * @param inputFile     the file that will be encrypted
+	 * @param outputFile    the file that is encrypted
 	 * @throws Exception 
 	 */
-	public void encrypt(byte[] key, File in, File out) throws Exception {
-		// Initialize the cipher
-		KeySpec ks = new SecretKeySpec(key, "AES");
-		Cipher cf = Cipher.getInstance("AES/ECB/PKCS5Padding");
-		cf.init(Cipher.ENCRYPT_MODE, (SecretKeySpec) ks);
+	public void encryptFile(byte[] generatedKey, File inputFile, File outputFile) throws Exception {
+		/*
+		 * The cipher is initialized from the AES algorithm
+		 */
+		KeySpec keySpec = new SecretKeySpec(generatedKey, "AES");
+		Cipher cipherAES = Cipher.getInstance("AES/ECB/PKCS5Padding");
+		cipherAES.init(Cipher.ENCRYPT_MODE, (SecretKeySpec) keySpec);
 
-		// Initialize the Input and Output streams
-		FileInputStream fis = new FileInputStream(in);
-		FileOutputStream fos = new FileOutputStream(out);
-//		FileOutputStream fos2 = new FileOutputStream(in.getAbsolutePath()+".hash");
+		/*
+		 * The input/output streams are initialized to read the files
+		 */
+		FileInputStream fileInputStream = new FileInputStream(inputFile);
+		FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
 
-
-		// Determine the size of the buffer
-		int bufferBytes = Math.min(fis.available(), 64);
-		byte[] buffer = new byte[bufferBytes];
-
-		// While remaining bytes still fit in a 64byte buffer.
+		/*
+		 * The size of the buffer is set, in this case 64 bytes
+		 */
+		int bufferBytesSize = Math.min(fileInputStream.available(), 64);
+		byte[] buffer = new byte[bufferBytesSize];
+		
+		/*
+		 * If bytes still fit in the buffer, keep reading the input file
+		 */
 		while (buffer.length == 64) {
-			fis.read(buffer);
-			byte[] encryptedBuffer = cf.update(buffer);
-			fos.write(encryptedBuffer);
-			bufferBytes = Math.min(fis.available(), 64);
-			buffer = new byte[bufferBytes];
+			fileInputStream.read(buffer);
+			byte[] bufferEncrypted = cipherAES.update(buffer);
+			fileOutputStream.write(bufferEncrypted);
+			bufferBytesSize = Math.min(fileInputStream.available(), 64);
+			buffer = new byte[bufferBytesSize];
 		}
-		// Last portion of data
-		fis.read(buffer);
-		byte[] encryptedBuffer = cf.doFinal(buffer);
-		fos.write(encryptedBuffer);
-//		fos2.write(FileEncrypterDecrypter.computeSHA1(new File(in.getAbsolutePath())).getBytes(Charset.forName("UTF-8")));
+		fileInputStream.read(buffer);
+		byte[] encryptedBuffer = cipherAES.doFinal(buffer);
+		fileOutputStream.write(encryptedBuffer);
 
-
-		// Close the Input and Output streams
-		fis.close();
-		fos.close();
-//		fos2.close();
+		fileInputStream.close();
+		fileOutputStream.close();
 
 	}
-
-	/**
-	 * Decrypts a file utilizing a given 128-bit key.
-	 * 
-	 * @param key Key used for the AES algorithm.
-	 * @param in  path in which the target file is located.
-	 * @param out path in which the decrypted file will be written.
-	 * @throws Exception
-	 */
-//	public static boolean decrypt(byte[] key, File in, File out, File shaFile) throws Exception {
-//
-//		String cypher = null;
-//		BufferedReader br = new BufferedReader(new FileReader(shaFile));
-//		while ((cypher = br.readLine()) != null) {
-//			cypher = cypher.trim();
-//			break;
-//		}
-//
-//		br.close();
-//
-//		// Initialize the cipher
-//		KeySpec ks = new SecretKeySpec(key, "AES");
-//		Cipher cf = Cipher.getInstance("AES/ECB/PKCS5Padding");
-//		cf.init(Cipher.DECRYPT_MODE, (SecretKeySpec) ks);		
-//
-//		// Initialize the Input and Output streams
-//		FileInputStream fis = new FileInputStream(in);
-//		FileOutputStream fos = new FileOutputStream(out);
-//
-//		// Determine the size of the buffer
-//		int bufferBytes = Math.min(fis.available(), 64);
-//		byte[] buffer = new byte[bufferBytes];
-//
-//		// While remaining bytes still fit in a 64byte buffer.
-//		while (buffer.length == 64) {
-//			fis.read(buffer);
-//			byte[] encryptedBuffer = cf.update(buffer);
-//			fos.write(encryptedBuffer);
-//			bufferBytes = Math.min(fis.available(), 64);
-//			buffer = new byte[bufferBytes];
-//		}
-//		// Last portion of data
-//		fis.read(buffer);
-//		byte[] encryptedBuffer = cf.doFinal(buffer);
-//		fos.write(encryptedBuffer);
-//
-//		// Close the Input and Output streams
-//		fis.close();
-//		fos.close();
-//
-//		File decriptedFile = new File(out.getAbsolutePath());
-//		String newHash = computeSHA1(decriptedFile);
-//
-//		if (cypher == null) {
-//			return false;
-//		}
-//
-//		return cypher.equals(newHash);
-//
-//	}
 	
 	/**
-	 * Decrypts a file utilizing a given 128-bit key.
+	 * This algorithm decrypts the given file given using the generated 128-bit
 	 * 
-	 * @param key Key used for the AES algorithm.
-	 * @param in  path in which the target file is located.
-	 * @param out path in which the decrypted file will be written.
+	 * @param keyAES this key is used for the AES algorithm.
+	 * @param inputFile  path location of the input file.
+	 * @param outputFile path location of the out put file. 
 	 * @throws Exception
 	 */
-	public void decrypt(byte[] key, File in, File out) throws Exception {
+	public void decryptFile(byte[] keyAES, File inputFile, File outputFile) throws Exception {
 	
 		
-		// Initialize the cipher
-		KeySpec ks = new SecretKeySpec(key, "AES");
-		Cipher cf = Cipher.getInstance("AES/ECB/PKCS5Padding");
-		cf.init(Cipher.DECRYPT_MODE, (SecretKeySpec) ks);		
+		KeySpec keySpec = new SecretKeySpec(keyAES, "AES");
+		Cipher cipherAES = Cipher.getInstance("AES/ECB/PKCS5Padding");
+		cipherAES.init(Cipher.DECRYPT_MODE, (SecretKeySpec) keySpec);		
 		
-		// Initialize the Input and Output streams
-		FileInputStream fis = new FileInputStream(in);
-		FileOutputStream fos = new FileOutputStream(out);
+		FileInputStream fileInputStream = new FileInputStream(inputFile);
+		FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
 		
-		// Determine the size of the buffer
-		int bufferBytes = Math.min(fis.available(), 64);
-		byte[] buffer = new byte[bufferBytes];
-		
-		// While remaining bytes still fit in a 64byte buffer.
+		int bufferBytesSize = Math.min(fileInputStream.available(), 64);
+		byte[] buffer = new byte[bufferBytesSize];
 		while (buffer.length == 64) {
-			fis.read(buffer);
-			byte[] encryptedBuffer = cf.update(buffer);
-			fos.write(encryptedBuffer);
-			bufferBytes = Math.min(fis.available(), 64);
-			buffer = new byte[bufferBytes];
+			fileInputStream.read(buffer);
+			byte[] bufferEncrypted = cipherAES.update(buffer);
+			fileOutputStream.write(bufferEncrypted);
+			bufferBytesSize = Math.min(fileInputStream.available(), 64);
+			buffer = new byte[bufferBytesSize];
 		}
-		// Last portion of data
-		fis.read(buffer);
-		byte[] encryptedBuffer = cf.doFinal(buffer);
-		fos.write(encryptedBuffer);
+		fileInputStream.read(buffer);
+		byte[] encryptedBuffer = cipherAES.doFinal(buffer);
+		fileOutputStream.write(encryptedBuffer);
 		
-		// Close the Input and Output streams
-		fis.close();
-		fos.close();
+		fileInputStream.close();
+		fileOutputStream.close();
 		
 //		File decriptedFile = new File(out.getAbsolutePath());
 //		String newHash = computeSHA1(decriptedFile);
 		
-//		if (cypher == null) {
-//			return false;
-//		}
-		
 	}
 
-	public void generateSHA1(File in, File out) throws Exception {
+	/**
+	 * This algorithm is the cryptographic hash function, which generates a 160-bit (20-byte) 
+	 * hash from any input value.
+	 * @param inputFile     the file that will be encrypted
+	 * @param outputFile    the file that is encrypted
+	 * @throws Exception
+	 */
+	public void generateSHA1(File inputFile, File outputFile) throws Exception {
 		MessageDigest sha1 = MessageDigest.getInstance("SHA1");
-		FileInputStream fis = new FileInputStream(in);
-		FileOutputStream fos = new FileOutputStream(out);
+		FileInputStream fileInputStream = new FileInputStream(inputFile);
+		FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
 
-		byte[] data = new byte[1024];
-		int read = 0;
-		while ((read = fis.read(data)) != -1) {
-			sha1.update(data, 0, read);
+		byte[] dataBytes = new byte[1024];
+		int readFile = 0;
+		while ((readFile = fileInputStream.read(dataBytes)) != -1) {
+			sha1.update(dataBytes, 0, readFile);
 		}
 		;
 		byte[] hashBytes = sha1.digest();
 
-		StringBuffer sb = new StringBuffer();
+		StringBuffer bufferString = new StringBuffer();
 		for (int i = 0; i < hashBytes.length; i++) {
-			sb.append(Integer.toString((hashBytes[i] & 0xff) + 0x100, 16).substring(1));
+			bufferString.append(Integer.toString((hashBytes[i] & 0xff) + 0x100, 16).substring(1));
 		}
-		String fileHash = sb.toString();
+		String fileHash = bufferString.toString();
 		
-		fos.write(fileHash.getBytes(Charset.forName("UTF-8")));
+		fileOutputStream.write(fileHash.getBytes(Charset.forName("UTF-8")));
 		
-		fis.close();
-		fos.close();
+		fileInputStream.close();
+		fileOutputStream.close();
 
 	}
-	
-	public boolean verifySHA1(File file, File hash) throws Exception {
-		String inHash = null;
-		BufferedReader br = new BufferedReader(new FileReader(hash));
-		while ((inHash = br.readLine()) != null) {
-			inHash = inHash.trim();
-			break;
-		}
-		br.close();
-		
-		String fileHash = computeSHA1(file);
-		
-		return fileHash.equals(inHash);
-		
-	}
-	
+	/**
+	 * This algorithm generates the sha1 
+	 * @param file
+	 * @return
+	 * @throws Exception
+	 */
 	public String computeSHA1(File file) throws Exception {
 		MessageDigest sha1 = MessageDigest.getInstance("SHA1");
 		FileInputStream fis = new FileInputStream(file);
@@ -271,4 +196,29 @@ public class FileEncrypterDecrypter {
 		fis.close();
 		return fileHash;
 	}
+	
+	/**
+	 * This algorithm is used to verify if sha1 of the input file is the same as the hash 
+	 * generated by the generateSHA1 algorithm
+	 * @param inputFile
+	 * @param sha1
+	 * @return true if the sha1 of the input file is the same that was generated by the
+	 * generateSHA1 algorithm
+	 * @throws Exception
+	 */
+	public boolean verifySHA1(File inputFile, File sha1) throws Exception {
+		String inputHashFile = null;
+		BufferedReader bufferedReader = new BufferedReader(new FileReader(sha1));
+		while ((inputHashFile = bufferedReader.readLine()) != null) {
+			inputHashFile = inputHashFile.trim();
+			break;
+		}
+		bufferedReader.close();
+		
+		String sha1InputFile = computeSHA1(inputFile);
+		
+		return sha1InputFile.equals(inputHashFile);
+		
+	}
+
 }

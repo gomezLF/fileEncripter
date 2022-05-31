@@ -63,7 +63,7 @@ public class MainMenuController {
     				
     				byte[] key = this.modelo.PBKDF2(password, SALT.getBytes(), ITERATIONS, KEY_LENGTH);
     				
-    				this.modelo.decrypt(key, this.inDec, outDec);
+    				this.modelo.decryptFile(key, this.inDec, outDec);
     				
     				if(this.modelo.verifySHA1(outDec, this.inHash)) {
     					showInfoAlert("Su archivo ha sido descifrado. Los hashes coinciden.");
@@ -104,7 +104,7 @@ public class MainMenuController {
     				File outHash = new File(inEnc.getAbsolutePath()+".hash");
     				
     				// Encrypt the file
-    				this.modelo.encrypt(key, this.inEnc, outEnc);
+    				this.modelo.encryptFile(key, this.inEnc, outEnc);
     				
     				// Generate hash
     				this.modelo.generateSHA1(this.inEnc, outHash);
