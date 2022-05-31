@@ -16,10 +16,10 @@ public class MainMenuController {
 	public final static int ITERATIONS = 10000;
 	public final static int KEY_LENGTH = 128;
 	
-	private FileEncrypterDecrypter modelo;
-	private File inEnc;
-	private File inDec;
-	private File inHash;
+	private FileEncrypterDecrypter fileED;
+	private File inputEncryptedFile;
+	private File inputDecryptedFile;
+	private File inputHashFile;
 
     @FXML
     private PasswordField decriptPassword_txt;
@@ -40,7 +40,7 @@ public class MainMenuController {
 
     @FXML
     void initialize() {
-    	this.modelo = new FileEncrypterDecrypter();
+    	this.fileED = new FileEncrypterDecrypter();
     }
 
 
@@ -49,39 +49,41 @@ public class MainMenuController {
     void decriptFileClicked(ActionEvent event) {
     	
     	if(validateEmptyFields(this.decriptPassword_txt)) {
-    		showErrorAlert("Debe de llenar todos los campos anter de desencriptar un archivo");
+    		
+    		showErrorAlert("You should complete all the fields to decrypt a file");
     		
     	}else {
-    		if(this.inDec != null && this.inHash != null) {
+    		if(this.inputDecryptedFile != null && this.inputHashFile != null) {
         		
         		char[] password = this.decriptPassword_txt.getText().toCharArray();
         		
         		try {
-    				String path = this.inDec.getAbsolutePath();
+    				String path = this.inputDecryptedFile.getAbsolutePath();
     				path = path.substring(0, path.length() - 4);
     				File outDec = new File(path);
     				
-    				byte[] key = this.modelo.PBKDF2(password, SALT.getBytes(), ITERATIONS, KEY_LENGTH);
+    				byte[] key = this.fileED.PBKDF2(password, SALT.getBytes(), ITERATIONS, KEY_LENGTH);
     				
-    				this.modelo.decryptFile(key, this.inDec, outDec);
+    				this.fileED.decryptFile(key, this.inputDecryptedFile, outDec);
     				
-    				if(this.modelo.verifySHA1(outDec, this.inHash)) {
-    					showInfoAlert("Su archivo ha sido descifrado. Los hashes coinciden.");
+    				if(this.fileED.verifySHA1(outDec, this.inputHashFile)) {
+    					showInfoAlert("Your file has been decrypted becauses the hashes are the same.");
     					clearFields();
     					
     				} else {
-    					showInfoAlert("Su archivo ha sido descifrado, pero puede que haya sido manipulado. Los hashes no coinciden.");
+    					showInfoAlert("The hashes are not the same, therefore your file could have been modified.");
     					clearFields();
     				}
 
     				
     			} catch (Exception e1) {
     				e1.printStackTrace();
-    				showErrorAlert("La contrasena no concide");
+    				showErrorAlert("The password doesn't match");
     			}
         		
     		}else {
-    			showErrorAlert("Debe de seleccionar un archivo y su correspondiente hash para desencriptarlo");
+    			
+    			showErrorAlert("You should choose a file and its respective hash to decrypt it.");
     		}
     	}
     }
@@ -92,24 +94,20 @@ public class MainMenuController {
     	
     	if(validateEmptyFields(this.encriptPassword_txt)) {
     		
-    		showErrorAlert("Debe de llenar todos los campos anter de encriptar un archivo");
+    		showErrorAlert("You should complete all the fields to encrypt a file");
     		
     	}else {
-    		if(inEnc != null) {
+    		if(inputEncryptedFile != null) {
         		char[] password = this.encriptPassword_txt.getText().toCharArray();
         		
     			try {
-    				byte[] key = modelo.PBKDF2(password, SALT.getBytes(), ITERATIONS, KEY_LENGTH);
-    				File outEnc = new File(inEnc.getAbsolutePath()+".cif");
-    				File outHash = new File(inEnc.getAbsolutePath()+".hash");
-    				
-    				// Encrypt the file
-    				this.modelo.encryptFile(key, this.inEnc, outEnc);
-    				
-    				// Generate hash
-    				this.modelo.generateSHA1(this.inEnc, outHash);
+    				byte[] key = fileED.PBKDF2(password, SALT.getBytes(), ITERATIONS, KEY_LENGTH);
+    				File outEnc = new File(inputEncryptedFile.getAbsolutePath()+".cif");
+    				File outHash = new File(inputEncryptedFile.getAbsolutePath()+".hash");
+       				this.fileED.encryptFile(key, this.inputEncryptedFile, outEnc);
+    				this.fileED.generateSHA1(this.inputEncryptedFile, outHash);
 
-    				showInfoAlert("Se ha cifrado el archivo exitosamente");
+    				showInfoAlert("The file has been ecrypted successfully.");
     				clearFields();
     				
     			} catch (Exception e1) {
@@ -117,7 +115,7 @@ public class MainMenuController {
     			}
     			
     		}else {
-    			showErrorAlert("Debe de seleccionar un archivo para encriptarlo");
+    			showErrorAlert("You should choose a file to encrypt.");
     		}
     	}
     	
@@ -127,7 +125,7 @@ public class MainMenuController {
     @FXML
     void fileHashClicked(ActionEvent event) {
     	FileChooser fileChooser = new FileChooser();
-    	fileChooser.setTitle("Buscar archivo a encriptar");
+    	fileChooser.setTitle("Search a file hash to encrypt.");
     	
     	fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("All FILES", "*.*"),
@@ -138,7 +136,7 @@ public class MainMenuController {
     	File file = fileChooser.showOpenDialog(null);
     	
     	if(file != null) {
-    		this.inDec = file;
+    		this.inputDecryptedFile = file;
     		this.fileHash_txt.setText(file.getPath());
     	}
     }
@@ -147,7 +145,7 @@ public class MainMenuController {
     @FXML
     void fileToDecriptClicked(ActionEvent event) {
     	FileChooser fileChooser = new FileChooser();
-    	fileChooser.setTitle("Buscar archivo a encriptar");
+    	fileChooser.setTitle("Search a file to decrypt.");
     	
     	fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("All FILES", "*.*"),
@@ -157,7 +155,7 @@ public class MainMenuController {
     	File file = fileChooser.showOpenDialog(null);
     	
     	if(file != null) {
-    		this.inDec = file;
+    		this.inputDecryptedFile = file;
     		this.pathFileToDecript_txt.setText(file.getPath());
     	}
     }
@@ -166,7 +164,7 @@ public class MainMenuController {
     @FXML
     void fileToEncriptClicked(ActionEvent event) {
     	FileChooser fileChooser = new FileChooser();
-    	fileChooser.setTitle("Buscar archivo a encriptar");
+    	fileChooser.setTitle("Search a file to encrypt");
     	
     	fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("All Images", "*.*")
@@ -175,7 +173,7 @@ public class MainMenuController {
     	File file = fileChooser.showOpenDialog(null);
     	
     	if(file != null) {
-    		this.inEnc = file;
+    		this.inputEncryptedFile = file;
     		this.pathFileToEncript_txt.setText(file.getPath());
     	}
     }
@@ -214,8 +212,8 @@ public class MainMenuController {
     	this.pathFileToEncript_txt.setText("");
     	this.fileHash_txt.setText("");
     	
-    	this.inDec = null;
-    	this.inEnc = null;
-    	this.inHash = null;
+    	this.inputDecryptedFile = null;
+    	this.inputEncryptedFile = null;
+    	this.inputHashFile = null;
     }
 }
