@@ -129,14 +129,13 @@ public class MainMenuController {
     	
     	fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("All FILES", "*.*"),
-                new FileChooser.ExtensionFilter("CIF", "*.cif"),
                 new FileChooser.ExtensionFilter("HASH", "*.hash")
         );
     	
     	File file = fileChooser.showOpenDialog(null);
     	
     	if(file != null) {
-    		this.inputDecryptedFile = file;
+    		this.inputHashFile = file;
     		this.fileHash_txt.setText(file.getPath());
     	}
     }

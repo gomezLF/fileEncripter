@@ -132,8 +132,6 @@ public class FileEncrypterDecrypter {
 		fileInputStream.close();
 		fileOutputStream.close();
 		
-//		File decriptedFile = new File(out.getAbsolutePath());
-//		String newHash = computeSHA1(decriptedFile);
 		
 	}
 
